@@ -1,0 +1,17 @@
+/build
+/logs
+/devel
+*frames.gv
+*frames.pdf
+.DS_Store
+*.pyc
+/neuroracer
+.svn
+.svn/*
+build
+*~
+\#*#
+.\#*
+.catkin_tools
+/training_results
+
