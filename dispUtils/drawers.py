@@ -111,7 +111,7 @@ def noCollideSpawn(surface, blacklist,distance):
     maxX = surface.get_width() - 200
     maxY = surface.get_height() - 200
 
-
+    
     objX = int(random.uniform(200, maxX))
     objY = int(random.uniform(200, maxY))
     tryDist = distance

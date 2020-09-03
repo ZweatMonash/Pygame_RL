@@ -8,7 +8,7 @@ class Agent():
 
     # movement Parameters of Agent
     updatesPerSecond = 1   # steps per sec overserbing
-    realTimeFactor =  50   # related to the clock /speeding up for training
+    # realTimeFactor =  10        # related to the clock /speeding up for training
     forwardSpeed = {'linearSpeed': 50/updatesPerSecond, 'angularSpeed': 0/updatesPerSecond}
     leftSpeed = {'linearSpeed':10/updatesPerSecond, 'angularSpeed': 0.6/updatesPerSecond}
     rightSpeed = {'linearSpeed': 10/updatesPerSecond, 'angularSpeed': -0.6/updatesPerSecond}

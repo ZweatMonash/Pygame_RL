@@ -10,18 +10,18 @@ import json
 #Time
 mainClock = pygame.time.Clock()
 updatesPerSecond = 1
-realTimeFactor =  50
+realTimeFactor =  20 
 import time
 
-AImode = 1
+AImode = 0
 performaceCheck = False
 numberOfEpochsToTest = 10
 testingInterval = 200
 startTesting = 1000
 saveRate = 10000 #Saves the weights and parameters every x epochs
-resume_epoch = '9480' # change to epoch to continue from
-resume_training_name = 'Simple_World'
-training_name = "Simple_World"
+resume_epoch = '0' # change to epoch to continue from
+resume_training_name = 'Simple_room'
+training_name = "Simple_room"
 
 # create the AI
 path = os.path.dirname(os.path.abspath(__file__)) + '/training_results/' + training_name + '_ep'
@@ -64,13 +64,14 @@ elif AImode == 2:
 
 else:
     #start running
+    print("Testing weights")
     resume_path = path + resume_epoch
     weights_path = resume_path + '.h5'
     params_json  = resume_path + '.json'
 
     AIparams = dataUtils.loadAIParams(params_json)
     epochs, steps, updateTargetNetwork, explorationRate, epsilon_decay, minibatch_size, learnStart, learningRate, discountFactor, memorySize, network_inputs, network_outputs, network_structure, current_epoch = dataUtils.setAIParams(AIparams)
-    explorationRate = 0.01 #Since we dont want any more learning
+    explorationRate = 0.05 #Since we dont want any more learning
 
 brain = AI.DeepQ(network_inputs, network_outputs, memorySize, discountFactor, learningRate, learnStart)
 brain.initNetworks(network_structure)
@@ -100,7 +101,7 @@ highest_reward = 0
 env = Environment()
 targetStepCounter = 0
 
-
+import time
 
 while True: 
     for event in pygame.event.get():
@@ -115,55 +116,60 @@ while True:
     cumulated_reward = 0
     observation = env.reset()
     # print(observation)
-    while not done:
-        action = 3
+    while not done and stepCounter <= 3000:
         qValues = brain.getQValues(observation)
         action = brain.selectAction(qValues,explorationRate)
         
+
         newObservation, reward, done, _ = env.step(action)
+        # print(newObservation[11:])
+        # print(reward)
         
         cumulated_reward += reward
         if highest_reward < cumulated_reward:
             highest_reward = cumulated_reward
 
-        brain.addMemory(observation, action, reward, newObservation, done)
+        if AImode != 3:
+            brain.addMemory(observation, action, reward, newObservation, done)
 
-        if targetStepCounter >= learnStart and targetStepCounter%minibatch_size == 0:
+        if targetStepCounter >= learnStart  and AImode != 3:
             if targetStepCounter <= updateTargetNetwork:
                 brain.learnOnMiniBatch(minibatch_size, False)
             else :
                 brain.learnOnMiniBatch(minibatch_size, True)
         
-        observation = newObservation #next state
+        
+        targetStepCounter += 1
+        stepCounter += 1
 
-        if targetStepCounter % updateTargetNetwork == 0:
-            targetStepCounter = 0
+        if targetStepCounter % updateTargetNetwork == 0 and AImode != 3:
             brain.updateTargetNetwork()
             print ("updating target network")
 
-        if done == True:
-            
+        if done == True or stepCounter >= 3000:
              # If we're training then save the reward from that epoch
             if AImode != 3:
                 dataUtils.save_rewards(reward_file,epoch,cumulated_reward,stepCounter)
 
-            # Save the model if we've hit saveRate number of epochs
-            if epoch%1000 == 0:
-                #save model weights and monitoring data every 100 epochs.
-                brain.saveModel(path+str(epoch)+'.h5')
-                parameter_keys = ['epochs','steps','updateTargetNetwork','explorationRate','epsilon_decay','minibatch_size','learnStart','learningRate','discountFactor','memorySize','network_inputs','network_outputs','network_structure','current_epoch']
-                parameter_values = [epochs, steps, updateTargetNetwork, explorationRate,epsilon_decay, minibatch_size, learnStart, learningRate, discountFactor, memorySize, network_inputs, network_outputs, network_structure, epoch]
-                parameter_dictionary = dict(zip(parameter_keys, parameter_values))
-                with open(path+str(epoch)+'.json', 'w') as outfile:
-                    json.dump(parameter_dictionary, outfile)
-
-            epoch += 1
-            explorationRate *= epsilon_decay
-            explorationRate = max(0.05, explorationRate)
-            
-        stepCounter += 1
-        targetStepCounter += 1
         mainClock.tick(updatesPerSecond * realTimeFactor)
+        observation = newObservation #next state
+    explorationRate *= epsilon_decay
+    print("epoch: ", epoch, "  Exploration rate: ", explorationRate)
+    explorationRate = max(0.05, explorationRate)
+
+    # Save the model if we've hit saveRate number of epochs
+    if epoch%200 == 0 and AImode != 3:
+        #save model weights and monitoring data every 100 epochs.
+        brain.saveModel(path+str(epoch)+'.h5')
+        parameter_keys = ['epochs','steps','updateTargetNetwork','explorationRate','epsilon_decay','minibatch_size','learnStart','learningRate','discountFactor','memorySize','network_inputs','network_outputs','network_structure','current_epoch']
+        parameter_values = [epochs, steps, updateTargetNetwork, explorationRate,epsilon_decay, minibatch_size, learnStart, learningRate, discountFactor, memorySize, network_inputs, network_outputs, network_structure, epoch]
+        parameter_dictionary = dict(zip(parameter_keys, parameter_values))
+        with open(path+str(epoch)+'.json', 'w') as outfile:
+            json.dump(parameter_dictionary, outfile)
+    
+    epoch += 1
+        
+       
     
 
    

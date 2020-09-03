@@ -26,8 +26,8 @@ def mapGeneration(surface, map_type):
 def mapGeneration_twoRooms(surface):
     wallW = 50
     gapSize = 200
-    wallX = random.randint(400,surface.get_width() - 400 -wallW)
-    wallH = random.randint(400,surface.get_height() - 400)
+    wallX = 500
+    wallH = 500
     walls = []
     walls.append({'position':[wallX,0], 'width':wallW, 'height': wallH})
     walls.append({'position':[wallX,wallH + gapSize], 'width':wallW, 'height': surface.get_height() - wallH -gapSize})

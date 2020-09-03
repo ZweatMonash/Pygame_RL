@@ -111,7 +111,7 @@ class Environment(gym.Env):
         self.update_blacklist((self.goal_x,self.goal_y))
         self.agent.set_goal(self.goal_x,self.goal_y)
         self.draw_goals()
-        self.agent.x,self.agent.y = dispUtils.noCollideSpawn(self.windowSurface,self.blacklist,200)
+        self.agent.x,self.agent.y = dispUtils.noCollideSpawn(self.windowSurface,self.blacklist,300)
         self.update_blacklist(( self.agent.x,self.agent.y))
         self.agent.draw()
         if creeps_enabled: 
@@ -157,11 +157,9 @@ class Environment(gym.Env):
         # print("now" + str(self.agent.prev_relAngleDif))            
         # print("now"/ + str(self.agent.relAngleDif))
         if(self.agent.prev_relAngleDif> self.agent.relAngleDif or self.agent.relAngleDif < 5):
-            reward += 1.5
-        else:
-            reward -= 1.5
-
-        if self.agent.prev_goal_dis > self.agent.goal_dis + 10:
+            reward += 2
+     
+        if self.agent.prev_goal_dis > self.agent.goal_dis :
             reward += 5
         else:
             reward -= 5
@@ -169,7 +167,7 @@ class Environment(gym.Env):
         if self.done:
             reward += -1000
         elif self.agent.goal_dis < 0.5:
-            reward += 1000
+            reward += 300
 
         return reward
 
@@ -180,16 +178,15 @@ class Environment(gym.Env):
             self.creep1.update()
             self.creep2.update()
             self.creep3.update()
-        self.curr_step += 1
         self.agent.get_actions(action) #map action index to velocity
         self.agent.update_agent() #update the state of the agent based on action taken
+        
+        if self.agent.is_at_goal() :
+            self.reset_goal()
+        self.redraw()
         observation = self.agent.get_observations(self.windowSurface)
         self.is_done(observation)
         reward = self.get_reward(observation,action)
-        if self.agent.is_at_goal() :
-            print("restting goal")
-            self.reset_goal()
-        self.redraw()
         info = None
         return observation, reward, self.done, info
 
