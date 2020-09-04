@@ -20,8 +20,8 @@ testingInterval = 200
 startTesting = 1000
 saveRate = 10000 #Saves the weights and parameters every x epochs
 resume_epoch = '0' # change to epoch to continue from
-resume_training_name = 'Simple_room'
-training_name = "Simple_room"
+resume_training_name = 'Two_rooms'
+training_name = "Two_rooms"
 
 # create the AI
 path = os.path.dirname(os.path.abspath(__file__)) + '/training_results/' + training_name + '_ep'
@@ -132,7 +132,7 @@ while True:
         if AImode != 3:
             brain.addMemory(observation, action, reward, newObservation, done)
 
-        if targetStepCounter >= learnStart  and AImode != 3:
+        if targetStepCounter >= learnStart and targetStepCounter%minibatch_size == 0  and AImode != 3:
             if targetStepCounter <= updateTargetNetwork:
                 brain.learnOnMiniBatch(minibatch_size, False)
             else :

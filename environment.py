@@ -180,13 +180,12 @@ class Environment(gym.Env):
             self.creep3.update()
         self.agent.get_actions(action) #map action index to velocity
         self.agent.update_agent() #update the state of the agent based on action taken
-        
-        if self.agent.is_at_goal() :
-            self.reset_goal()
-        self.redraw()
         observation = self.agent.get_observations(self.windowSurface)
         self.is_done(observation)
         reward = self.get_reward(observation,action)
+        if self.agent.is_at_goal() :
+            self.reset_goal()
+        self.redraw()
         info = None
         return observation, reward, self.done, info
 
